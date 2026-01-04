@@ -1,4 +1,4 @@
-const CACHE_NAME = 'smkn1sidayu-native-v3';
+const CACHE_NAME = 'smkn1sidayu-native-v4';
 const urlsToCache = [
   './',
   './index.html',
