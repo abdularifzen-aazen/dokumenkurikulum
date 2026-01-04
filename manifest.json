@@ -1,0 +1,22 @@
+{
+  "name": "SMKN 1 Sidayu Bio Link",
+  "short_name": "SMKN 1 Sidayu",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "description": "Aplikasi Bio Link Resmi SMKN 1 Sidayu",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://smkn1sidayu.sch.id/wp-content/uploads/2016/06/cropped-icon_sdy.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://smkn1sidayu.sch.id/wp-content/uploads/2016/06/cropped-icon_sdy.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
