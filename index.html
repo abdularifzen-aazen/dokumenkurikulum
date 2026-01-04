@@ -7,8 +7,6 @@
     
     <!-- PWA Settings -->
     <link rel="manifest" href="manifest.json">
-    
-    <!-- Android Chrome Theme -->
     <meta name="theme-color" content="#2563eb">
     
     <!-- iOS Support -->
@@ -24,6 +22,7 @@
             overflow: hidden;
             background-color: #f3f4f6;
             -webkit-tap-highlight-color: transparent;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
         }
         
         iframe {
@@ -46,43 +45,65 @@
         }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-        /* --- INSTALL PROMPT STYLE (Mirip Native) --- */
-        #install-prompt {
-            display: none; /* Sembunyi default */
-            position: fixed; bottom: 0; left: 0; width: 100%;
+        /* --- BLOCKING INSTALL SCREEN --- */
+        #install-screen {
+            display: none; /* Default sembunyi, muncul via JS jika belum install */
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: white;
-            padding: 20px;
-            border-top-left-radius: 20px;
-            border-top-right-radius: 20px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.15);
             z-index: 10000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
             text-align: center;
-            transform: translateY(100%);
-            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        #install-prompt.show { transform: translateY(0); }
-        
-        .app-info { display: flex; align-items: center; gap: 15px; margin-bottom: 15px; text-align: left; }
-        .app-icon { width: 50px; height: 50px; border-radius: 12px; }
-        .app-text h3 { font-size: 16px; font-weight: bold; color: #1f2937; }
-        .app-text p { font-size: 12px; color: #6b7280; }
-        
-        .btn-group { display: flex; gap: 10px; }
-        .btn {
-            flex: 1; padding: 12px; border-radius: 10px;
-            font-weight: 600; font-size: 14px; border: none; cursor: pointer;
-        }
-        .btn-install { background: #2563eb; color: white; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3); }
-        .btn-cancel { background: #f3f4f6; color: #4b5563; }
 
-        /* iOS Instruction */
-        #ios-prompt {
-            display: none;
-            position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.8); color: white;
-            padding: 10px 20px; border-radius: 50px;
-            font-size: 12px; pointer-events: none; z-index: 10001;
+        .install-content {
+            max-width: 400px;
+            width: 100%;
+            display: flex; flex-direction: column; align-items: center;
+            animation: fadeIn 0.5s ease-out;
         }
+
+        .app-logo {
+            width: 100px; height: 100px;
+            border-radius: 20px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+        }
+
+        h1 { font-size: 24px; font-weight: 800; color: #1f2937; margin-bottom: 10px; }
+        p { font-size: 15px; color: #6b7280; line-height: 1.5; margin-bottom: 30px; }
+
+        .btn-install {
+            width: 100%;
+            padding: 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            transition: transform 0.2s;
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+        }
+        .btn-install:active { transform: scale(0.98); }
+
+        /* Instruksi Khusus iOS */
+        #ios-instruction {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f3f4f6;
+            border-radius: 12px;
+            font-size: 13px;
+            color: #4b5563;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
     </style>
 </head>
 <body>
@@ -90,11 +111,10 @@
     <!-- Loader -->
     <div id="loader">
         <div class="spinner"></div>
-        <p style="margin-top: 15px; font-family: sans-serif; font-size: 14px; color: #666;">Memuat Aplikasi...</p>
     </div>
 
-    <!-- IFRAME KE APPS SCRIPT -->
-    <!-- URL SUDAH DIPERBAIKI SESUAI PERMINTAAN -->
+    <!-- LAYAR UTAMA (IFRAME) -->
+    <!-- Konten ini hanya akan terlihat jika user sudah menginstal aplikasi -->
     <iframe 
         id="app-frame"
         src="https://script.google.com/macros/s/AKfycbyh6sSKFzJjwNcf9NnASUwlxdPEyOKtnC8iaiMppr5eaFlyjomKb3PePin-b39MPjR2/exec" 
@@ -103,82 +123,98 @@
         onload="hideLoader()">
     </iframe>
 
-    <!-- POPUP INSTALL (ANDROID/DESKTOP) -->
-    <div id="install-prompt">
-        <div class="app-info">
-            <img src="https://smkn1sidayu.sch.id/wp-content/uploads/2016/06/cropped-icon_sdy.png" class="app-icon" alt="Icon">
-            <div class="app-text">
-                <h3>Install Aplikasi</h3>
-                <p>Pasang untuk pengalaman layar penuh & lebih cepat.</p>
+    <!-- LAYAR PEMBLOKIR (INSTALL SCREEN) -->
+    <!-- Ini muncul menutupi iframe jika dibuka di browser biasa -->
+    <div id="install-screen">
+        <div class="install-content">
+            <img src="https://smkn1sidayu.sch.id/wp-content/uploads/2016/06/cropped-icon_sdy.png" class="app-logo" alt="Logo">
+            
+            <h1>Aplikasi SMKN 1 Sidayu</h1>
+            <p>Untuk mengakses Portal Digital Sekolah, Anda <strong>wajib menginstal</strong> aplikasi ini agar berjalan optimal dalam layar penuh.</p>
+            
+            <!-- Tombol Install Android -->
+            <button id="btn-install-action" class="btn-install" onclick="installApp()">
+                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                Install Aplikasi Sekarang
+            </button>
+
+            <!-- Panduan iOS -->
+            <div id="ios-instruction">
+                <p style="margin-bottom:5px; font-weight:bold;">Pengguna iPhone/iPad:</p>
+                1. Ketuk tombol <strong>Share</strong> (kotak panah) di bawah.<br>
+                2. Pilih menu <strong>"Add to Home Screen"</strong> (Tambah ke Layar Utama).
             </div>
         </div>
-        <div class="btn-group">
-            <button class="btn btn-cancel" onclick="dismissInstall()">Nanti</button>
-            <button class="btn btn-install" onclick="installApp()">Install Sekarang</button>
-        </div>
-    </div>
-
-    <!-- POPUP PETUNJUK IOS -->
-    <div id="ios-prompt">
-        Tap <span style="font-size:16px">share</span> lalu "Add to Home Screen" ➕
     </div>
 
     <script>
         // 1. Loader Logic
         function hideLoader() {
+            // Kita tahan loader sebentar untuk cek status install
             setTimeout(() => {
-                const loader = document.getElementById('loader');
-                loader.style.opacity = '0';
-                setTimeout(() => { loader.style.display = 'none'; }, 500);
-            }, 800);
+                checkInstallStatus();
+            }, 500);
         }
 
-        // 2. Logic PWA Install
+        // 2. Logic Cek Install & Tampilkan Blocking Screen
         let deferredPrompt;
-        const installModal = document.getElementById('install-prompt');
-        const iosPrompt = document.getElementById('ios-prompt');
+        const installScreen = document.getElementById('install-screen');
+        const loader = document.getElementById('loader');
+        const iosInstruction = document.getElementById('ios-instruction');
+        const androidBtn = document.getElementById('btn-install-action');
 
-        // Cek apakah sudah berjalan di mode Standalone (Sudah diinstall)
-        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        function checkInstallStatus() {
+            // Cek apakah mode standalone (sudah install)
+            const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 
-        if (!isStandalone) {
-            // DETEKSI ANDROID / CHROME
-            window.addEventListener('beforeinstallprompt', (e) => {
-                e.preventDefault();
-                deferredPrompt = e;
-                // Tampilkan Modal Custom kita
-                setTimeout(() => {
-                    installModal.classList.add('show');
-                }, 2000); // Muncul setelah 2 detik
-            });
+            if (isStandalone) {
+                // SUDAH INSTALL: Hapus loader, biarkan iframe terlihat
+                loader.style.opacity = '0';
+                setTimeout(() => { loader.style.display = 'none'; }, 500);
+            } else {
+                // BELUM INSTALL: Tampilkan Layar Blokir
+                // Jangan sembunyikan loader dulu sampai kita siapkan layar blokir
+                installScreen.style.display = 'flex';
+                
+                // Deteksi iOS untuk ubah instruksi
+                const isIos = /iphone|ipad|ipod/.test( window.navigator.userAgent.toLowerCase() );
+                if (isIos) {
+                    androidBtn.style.display = 'none'; // Sembunyikan tombol install otomatis (iOS gak bisa)
+                    iosInstruction.style.display = 'block'; // Munculkan panduan manual
+                }
 
-            // DETEKSI IOS (Karena iOS tidak support beforeinstallprompt)
-            const isIos = /iphone|ipad|ipod/.test( window.navigator.userAgent.toLowerCase() );
-            if (isIos) {
-                setTimeout(() => {
-                    iosPrompt.style.display = 'block';
-                    setTimeout(() => { iosPrompt.style.display = 'none'; }, 5000); // Hilang setelah 5 detik
-                }, 2000);
+                // Hapus loader, tampilkan layar blokir
+                loader.style.opacity = '0';
+                setTimeout(() => { loader.style.display = 'none'; }, 500);
             }
         }
 
-        // Fungsi Tombol Install
+        // 3. Menangkap event install Android
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Pastikan layar blokir muncul jika event ini tertangkap
+            installScreen.style.display = 'flex';
+        });
+
+        // 4. Fungsi Eksekusi Install
         async function installApp() {
             if (deferredPrompt) {
                 deferredPrompt.prompt();
                 const { outcome } = await deferredPrompt.userChoice;
                 if (outcome === 'accepted') {
                     deferredPrompt = null;
-                    installModal.classList.remove('show');
+                    // Setelah install, user biasanya harus buka manual dari home screen
+                    // Tapi kita bisa reload halaman untuk cek status
+                    window.location.reload(); 
                 }
+            } else {
+                // Fallback jika browser tidak support atau sudah di dismiss
+                alert("Silakan cari menu 'Install App' atau 'Add to Home Screen' di browser Anda.");
             }
         }
 
-        function dismissInstall() {
-            installModal.classList.remove('show');
-        }
-
-        // 3. Register Service Worker
+        // 5. Service Worker
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js');
