@@ -5,7 +5,7 @@
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#2563eb",
-  "description": "Aplikasi Resmi SMKN 1 Sidayu",
+  "description": "Aplikasi Dokumen Kurikulum Smeknisy",
   "orientation": "portrait",
   "icons": [
     {
@@ -22,4 +22,5 @@
     }
   ]
 }
+
 
