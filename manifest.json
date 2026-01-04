@@ -1,6 +1,6 @@
 {
-  "name": "SMKN 1 Sidayu",
-  "short_name": "SMKN 1 Sidayu",
+  "name": "Dokumen Kurikulum Smeknisy",
+  "short_name": "Doku Smeknisy Apps",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -22,3 +22,4 @@
     }
   ]
 }
+
